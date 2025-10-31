@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Creador de Series</title>
+  <style>
+    :root {
+      --color-primary: #1a237e;
+      --color-secondary: #4a148c;
+      --gradient-direction: to bottom right;
+    }
+    
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: white;
+      background: linear-gradient(var(--gradient-direction), var(--color-primary), var(--color-secondary));
+      overflow: hidden;
+      transition: background 0.8s ease;
+    }
+    
+    .container {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      transform-origin: center center;
+    }
+    
+    .header {
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cover {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    
+    .cover img {
+      width: 200px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .description {
+      max-width: 60%;
+    }
+    
+    .description h1 {
+      margin-top: 0;
+      font-size: 2.2em;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .description .meta {
+      margin-top: 10px;
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+    
+    .rating-square {
+      margin-top: 10px;
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      display: block;
+    }
+    
+    .episodes {
+      overflow-y: auto;
+      padding-right: 10px;
+      height: 100%;
+    }
+    
+    .episode {
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+      padding: 10px;
+      background-color: rgba(0,0,0,0.3);
+      margin-bottom: 10px;
+      border-radius: 8px;
+      outline: none;
+      opacity: 0;
+      transform: scale(0.95);
+      animation: fadeIn 0.5s ease forwards;
+      transition: background-color 0.3s, transform 0.3s;
+      cursor: pointer;
+    }
+    
+    .episode img {
+      width: 100px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    
+    .episode-info {
+      flex: 1;
+    }
+    
+    .episode-info h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    
+    .episode .duration {
+      font-size: 0.8em;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+    
+    .episode:focus, .episode:hover {
+      background-color: rgba(255,255,255,0.2);
+      transform: scale(1.03);
+    }
+    
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background-color: rgba(255,255,255,0.3);
+      border-radius: 3px;
+    }
+
+    /* Panel de control */
+    .control-panel {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 15px;
+      border-radius: 10px;
+      z-index: 100;
+      width: 320px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .control-panel h3 {
+      margin-top: 0;
+      color: white;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 10px;
+      text-align: center;
+    }
+
+    .control-panel input, .control-panel textarea, .control-panel select {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #555;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .control-panel input::placeholder, .control-panel textarea::placeholder {
+      color: #aaa;
+    }
+
+    .control-panel button {
+      background: #4a90e2;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      transition: background 0.3s;
+    }
+
+    .control-panel button:hover {
+      background: #3a7bc8;
+    }
+
+    .control-panel button.delete {
+      background: #e74c3c;
+    }
+
+    .control-panel button.delete:hover {
+      background: #c0392b;
+    }
+
+    .control-panel button.danger {
+      background: #d63031;
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      font-weight: bold;
+    }
+
+    .control-panel button.danger:hover {
+      background: #c0392b;
+    }
+
+    .control-section {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .episode-controls {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .color-picker {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .color-picker input {
+      flex: 1;
+      height: 40px;
+      padding: 0;
+    }
+
+    .json-controls {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .json-controls button {
+      flex: 1;
+    }
+
+    .toggle-panel {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 101;
+    }
+
+    .field-help {
+      font-size: 0.8em;
+      color: #aaa;
+      margin-top: -8px;
+      margin-bottom: 10px;
+    }
+
+    .field-help a {
+      color: #4a90e2;
+      text-decoration: none;
+    }
+
+    .field-help a:hover {
+      text-decoration: underline;
+    }
+
+    .top-controls {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .input-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.9em;
+      color: #ccc;
+    }
+
+    .section-title {
+      color: #4a90e2;
+      font-size: 1.1em;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 5px;
+    }
+
+    .simple-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .simple-controls button {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Boton para mostrar/ocultar panel -->
+  <button class="toggle-panel" onclick="toggleControlPanel()"> Menu</button>
+
+  <!-- Panel de control -->
+  <div class="control-panel" id="control-panel">
+    <h3>dimox creator</h3>
+    
+    <div class="top-controls">
+      <button class="danger" onclick="deleteEverything()"> Borrar Todo</button>
+    </div>
+    
+    <div class="control-section">
+      <div class="section-title">Informacion Basica</div>
+      
+      <span class="input-label">Titulo:</span>
+      <input type="text" id="series-title" placeholder="Nombre de tu serie">
+      
+      <span class="input-label">Descripcion:</span>
+      <textarea id="series-description" placeholder="De que trata la serie..." rows="2"></textarea>
+      
+      <span class="input-label">Portada:</span>
+      <input type="text" id="series-cover" placeholder="Enlace de imagen">
+      <div class="field-help">
+        <a href="https://catbox.moe" target="_blank">Subir imagen a catbox.moe</a>
+      </div>
+    </div>
+
+    <div class="control-section">
+      <div class="section-title">Colores</div>
+      
+      <span class="input-label">Color principal:</span>
+      <div class="color-picker">
+        <input type="color" id="color-primary" value="#1a237e">
+      </div>
+      
+      <span class="input-label">Color secundario:</span>
+      <div class="color-picker">
+        <input type="color" id="color-secondary" value="#4a148c">
+      </div>
+      
+      <button onclick="updateBackground()">Aplicar Colores</button>
+    </div>
+
+    <div class="control-section">
+      <div class="section-title">Episodios</div>
+      <div id="episode-controls">
+        <!-- Los controles de episodios se generan aqui -->
+      </div>
+      <button onclick="addEpisode()"> Agregar Episodio</button>
+    </div>
+
+    <div class="control-section">
+      <div class="section-title">Opciones</div>
+      <div class="simple-controls">
+        <button onclick="saveSeries()"> Guardar Serie</button>
+        <button onclick="newSeries()"> Nueva Serie</button>
+        <button onclick="exportSeries()"> Exportar</button>
+        <button onclick="importSeries()"> Importar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="container" id="main-container">
+    <div class="header">
+      <div class="cover">
+        <img id="cover-image" src="https://via.placeholder.com/200x300/333/fff?text=Portada" alt="Portada de la serie" />
+        <div class="description">
+          <h1 id="series-title-display">Mi Serie</h1>
+          <p id="series-description-display">Descripcion de la serie.</p>
+          <div class="meta">
+            <strong>Haz clic en cualquier episodio para ver el video</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="episodes" tabindex="0" id="episodes-container">
+      <!-- Los episodios se generan aqui -->
+    </div>
+  </div>
+
+  <script>
+    // Datos de la serie actual
+    let currentSeries = {
+      id: null,
+      title: "Mi Serie",
+      description: "Descripcion de la serie.",
+      coverImage: "https://via.placeholder.com/200x300/333/fff?text=Portada",
+      colorPrimary: "#1a237e",
+      colorSecondary: "#4a148c",
+      gradientDirection: "to bottom right",
+      episodes: []
+    };
+
+    // Lista de series guardadas
+    let savedSeries = [];
+
+    // Inicializar la aplicacion
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSavedSeries();
+      updateDisplay();
+      createEpisodeControls();
+      updateBackground();
+      
+      // Configurar eventos de cambio en tiempo real
+      document.getElementById('series-title').addEventListener('input', updateSeriesField);
+      document.getElementById('series-description').addEventListener('input', updateSeriesField);
+      document.getElementById('series-cover').addEventListener('input', updateSeriesField);
+      
+      document.getElementById('color-primary').addEventListener('change', updateBackground);
+      document.getElementById('color-secondary').addEventListener('change', updateBackground);
+    });
+
+    // Cargar series guardadas desde localStorage
+    function loadSavedSeries() {
+      const stored = localStorage.getItem('savedSeries');
+      if (stored) {
+        savedSeries = JSON.parse(stored);
+      }
+    }
+
+    // Actualizar el panel de control con los datos actuales
+    function updateControlPanel() {
+      document.getElementById('series-title').value = currentSeries.title;
+      document.getElementById('series-description').value = currentSeries.description;
+      document.getElementById('series-cover').value = currentSeries.coverImage;
+      document.getElementById('color-primary').value = currentSeries.colorPrimary;
+      document.getElementById('color-secondary').value = currentSeries.colorSecondary;
+    }
+
+    // Actualizar los campos de la serie en tiempo real
+    function updateSeriesField(e) {
+      const field = e.target.id;
+      const value = e.target.value;
+      
+      switch(field) {
+        case 'series-title':
+          currentSeries.title = value;
+          document.getElementById('series-title-display').textContent = value;
+          break;
+        case 'series-description':
+          currentSeries.description = value;
+          document.getElementById('series-description-display').textContent = value;
+          break;
+        case 'series-cover':
+          currentSeries.coverImage = value;
+          document.getElementById('cover-image').src = value;
+          break;
+      }
+    }
+
+    // Actualizar el fondo segun los colores seleccionados
+    function updateBackground() {
+      const primaryColor = document.getElementById('color-primary').value;
+      const secondaryColor = document.getElementById('color-secondary').value;
+      
+      currentSeries.colorPrimary = primaryColor;
+      currentSeries.colorSecondary = secondaryColor;
+      
+      document.documentElement.style.setProperty('--color-primary', primaryColor);
+      document.documentElement.style.setProperty('--color-secondary', secondaryColor);
+    }
+
+    // Crear controles para los episodios
+    function createEpisodeControls() {
+      const container = document.getElementById('episode-controls');
+      container.innerHTML = '';
+      
+      currentSeries.episodes.forEach((episode, index) => {
+        const episodeControl = document.createElement('div');
+        episodeControl.className = 'episode-controls';
+        episodeControl.innerHTML = `
+          <span class="input-label">Titulo del episodio:</span>
+          <input type="text" value="${episode.title}" placeholder="Ej: Episodio 1" onchange="updateEpisode(${index}, 'title', this.value)">
+          
+          <span class="input-label">Descripcion:</span>
+          <textarea placeholder="Descripcion del episodio..." onchange="updateEpisode(${index}, 'description', this.value)" rows="2">${episode.description}</textarea>
+          
+          <span class="input-label">Miniatura (URL):</span>
+          <input type="text" value="${episode.image}" placeholder="Enlace de imagen" onchange="updateEpisode(${index}, 'image', this.value)">
+          <div class="field-help">
+            <a href="https://catbox.moe" target="_blank">Subir imagen a catbox.moe</a>
+          </div>
+          
+          <span class="input-label">Enlace del video:</span>
+          <input type="text" value="${episode.videoUrl}" placeholder="Enlace de video de Catbox" onchange="updateEpisode(${index}, 'videoUrl', this.value)">
+          <div class="field-help">
+            <a href="https://catbox.moe" target="_blank">Subir video a catbox.moe</a>
+          </div>
+          
+          <span class="input-label">Duracion:</span>
+          <input type="text" value="${episode.duration}" placeholder="Ej: 10 min" onchange="updateEpisode(${index}, 'duration', this.value)">
+          
+          <button class="delete" onclick="removeEpisode(${index})">Eliminar Episodio</button>
+        `;
+        container.appendChild(episodeControl);
+      });
+    }
+
+    // Agregar un nuevo episodio
+    function addEpisode() {
+      currentSeries.episodes.push({
+        title: "Nuevo Episodio",
+        description: "Descripcion del episodio.",
+        image: "https://via.placeholder.com/100x150/333/fff?text=Episodio",
+        videoUrl: "",
+        duration: "0 min"
+      });
+      
+      createEpisodeControls();
+      updateDisplay();
+    }
+
+    // Actualizar un episodio
+    function updateEpisode(index, field, value) {
+      currentSeries.episodes[index][field] = value;
+      updateDisplay();
+    }
+
+    // Eliminar un episodio
+    function removeEpisode(index) {
+      currentSeries.episodes.splice(index, 1);
+      createEpisodeControls();
+      updateDisplay();
+    }
+
+    // Actualizar la visualizacion de la serie
+    function updateDisplay() {
+      document.getElementById('series-title-display').textContent = currentSeries.title;
+      document.getElementById('series-description-display').textContent = currentSeries.description;
+      document.getElementById('cover-image').src = currentSeries.coverImage;
+      
+      // Actualizar episodios
+      const episodesContainer = document.getElementById('episodes-container');
+      episodesContainer.innerHTML = '';
+      
+      currentSeries.episodes.forEach((episode, index) => {
+        const episodeElement = document.createElement('div');
+        episodeElement.className = 'episode';
+        episodeElement.tabIndex = index + 1;
+        
+        // Si hay un enlace de video, redirigir al hacer clic
+        if (episode.videoUrl) {
+          episodeElement.onclick = function() {
+            window.open(episode.videoUrl, '_blank');
+          };
+        }
+        
+        episodeElement.innerHTML = `
+          <img src="${episode.image}" alt="${episode.title}">
+          <div class="episode-info">
+            <h3>${episode.title}</h3>
+            <p>${episode.description}</p>
+            <p class="duration"> Duracion: ${episode.duration}</p>
+            ${episode.videoUrl ? '<p style="font-size:0.8em;color:#4a90e2;margin-top:5px;"> Haz clic para ver el video</p>' : ''}
+          </div>
+        `;
+        episodesContainer.appendChild(episodeElement);
+      });
+    }
+
+    // Exportar la serie como JSON
+    function exportSeries() {
+      const dataStr = JSON.stringify(currentSeries, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = currentSeries.title.replace(/\s+/g, '_') + '.json';
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    }
+
+    // Importar una serie desde JSON
+    function importSeries() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      
+      input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(event) {
+          try {
+            const importedSeries = JSON.parse(event.target.result);
+            currentSeries = importedSeries;
+            updateControlPanel();
+            updateDisplay();
+            createEpisodeControls();
+            updateBackground();
+          } catch (error) {
+            alert('Error al cargar el archivo: ' + error.message);
+          }
+        };
+        
+        reader.readAsText(file);
+      };
+      
+      input.click();
+    }
+
+    // Crear una nueva serie
+    function newSeries() {
+      currentSeries = {
+        id: Date.now(),
+        title: "Mi Serie",
+        description: "Descripcion de la serie.",
+        coverImage: "https://via.placeholder.com/200x300/333/fff?text=Portada",
+        colorPrimary: "#1a237e",
+        colorSecondary: "#4a148c",
+        gradientDirection: "to bottom right",
+        episodes: []
+      };
+      
+      updateControlPanel();
+      updateDisplay();
+      createEpisodeControls();
+      updateBackground();
+    }
+
+    // Guardar la serie actual
+    function saveSeries() {
+      if (!currentSeries.id) {
+        currentSeries.id = Date.now();
+      }
+      
+      // Verificar si ya existe
+      const existingIndex = savedSeries.findIndex(s => s.id === currentSeries.id);
+      
+      if (existingIndex >= 0) {
+        savedSeries[existingIndex] = {...currentSeries};
+      } else {
+        savedSeries.push({...currentSeries});
+      }
+      
+      localStorage.setItem('savedSeries', JSON.stringify(savedSeries));
+      alert('Serie guardada correctamente');
+    }
+
+    // Eliminar todo (series guardadas y serie actual)
+    function deleteEverything() {
+      if (confirm('�Estas seguro de que quieres borrar todo?')) {
+        // Eliminar todas las series guardadas
+        savedSeries = [];
+        localStorage.removeItem('savedSeries');
+        
+        // Crear una nueva serie vacia
+        newSeries();
+        
+        alert('Todo ha sido borrado');
+      }
+    }
+
+    // Mostrar/ocultar panel de control
+    function toggleControlPanel() {
+      const panel = document.getElementById('control-panel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+  </script>
+</body>
+  </html>
