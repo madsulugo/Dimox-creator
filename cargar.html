@@ -188,19 +188,26 @@
       pointer-events: none;
     }
     
-    /* Sugerencia de Catbox */
-    .catbox-suggestion {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 25px;
-      margin-bottom: 30px;
-      text-align: center;
-      max-width: 500px;
-      width: 90%;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Sugerencia de Catbox y Opciones */
+    .loader-options {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
     }
-    
+
+    .loader-section {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
     .catbox-logo {
       width: 120px;
       height: 120px;
@@ -229,7 +236,7 @@
       font-size: 1.3em;
     }
     
-    .catbox-btn {
+    .catbox-btn, .options-btn {
       background: #4a90e2;
       color: white;
       border: none;
@@ -240,22 +247,33 @@
       transition: all 0.3s;
       text-decoration: none;
       display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
     }
     
-    .catbox-btn:hover {
+    .catbox-btn:hover, .options-btn:hover {
       background: #3a7bc8;
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
     
-    .catbox-btn i {
+    .catbox-btn i, .options-btn i {
       margin-right: 8px;
     }
     
+    .options-btn {
+        background: #00897b; /* Un color diferente para distinguirlo */
+        margin-top: 10px;
+    }
+    
+    .options-btn:hover {
+        background: #00695c;
+    }
+
     /* Drop zone */
     .drop-zone {
-      width: 80%;
       max-width: 500px;
+      width: 90%;
       height: 200px;
       border: 3px dashed rgba(255, 255, 255, 0.5);
       border-radius: 20px;
@@ -267,6 +285,7 @@
       padding: 20px;
       transition: all 0.3s ease;
       cursor: pointer;
+      margin-bottom: 20px;
     }
     
     .drop-zone:hover, .drop-zone.dragover {
@@ -341,43 +360,158 @@
       align-items: center;
       gap: 5px;
     }
+    
+    /* Estilos del Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .modal-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal-content {
+      background: var(--color-primary);
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    
+    .modal-overlay.open .modal-content {
+        transform: scale(1);
+    }
+    
+    .modal-content h2 {
+        margin-top: 0;
+        border-bottom: 2px solid var(--color-secondary);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .modal-content textarea {
+        width: 100%;
+        min-height: 250px;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        font-family: monospace;
+        font-size: 0.9em;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+    
+    .modal-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+    
+    .modal-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background 0.3s;
+    }
+    
+    #load-json-btn {
+        background: #4a90e2;
+        color: white;
+    }
+    
+    #load-json-btn:hover {
+        background: #3a7bc8;
+    }
+    
+    #close-modal-btn {
+        background: #e57373;
+        color: white;
+    }
+    
+    #close-modal-btn:hover {
+        background: #d32f2f;
+    }
+
   </style>
 </head>
 <body>
-  <!-- Overlay para la animación de destello -->
   <div class="flash-overlay" id="flash-overlay"></div>
 
-  <!-- Botón para volver al cargador -->
   <button class="back-btn" id="back-btn">← Volver al Cargador</button>
 
-  <!-- Pantalla de carga -->
   <div class="loader" id="loader">
-    <!-- Sugerencia de Catbox -->
-    <div class="catbox-suggestion">
-      <div class="catbox-logo">
-        <i class="fas fa-cloud-upload-alt"></i>
-      </div>
-      <div class="suggestion-text">
-        <i class="fas fa-lightbulb suggestion-icon"></i>
-        <span>Sube tu archivo de la serie en catbox y compártelo en dimoxchat</span>
-      </div>
-      <button class="catbox-btn" id="catbox-btn">
-        <i class="fas fa-external-link-alt"></i> Ir a Catbox
-      </button>
-    </div>
-
-    <!-- Drop zone para JSON -->
-    <div class="drop-zone" id="drop-zone">
-      <i class="fas fa-file-import"></i>
-      <h2>Cargar Serie</h2>
-      <p>Arrastra y suelta tu archivo JSON aquí</p>
-      <p>o</p>
-      <button class="browse-btn" id="browse-btn">Seleccionar archivo</button>
-      <input type="file" id="file-input" class="file-input" accept=".json">
+    <div class="loader-options">
+        <div class="loader-section">
+          <div class="catbox-logo">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+          <div class="suggestion-text">
+            <i class="fas fa-lightbulb suggestion-icon"></i>
+            <span>Sube tu archivo de la serie en catbox y compártelo en dimoxchat</span>
+          </div>
+          <button class="catbox-btn" id="catbox-btn">
+            <i class="fas fa-external-link-alt"></i> Ir a Catbox
+          </button>
+        </div>
+    
+        <div class="drop-zone" id="drop-zone">
+          <i class="fas fa-file-import"></i>
+          <h2>Cargar Serie (Archivo)</h2>
+          <p>Arrastra y suelta tu archivo JSON aquí</p>
+          <p>o</p>
+          <button class="browse-btn" id="browse-btn">Seleccionar archivo</button>
+          <input type="file" id="file-input" class="file-input" accept=".json">
+        </div>
+        
+        <button class="options-btn" id="options-btn">
+            <i class="fas fa-code"></i> Otras Opciones (Pegar JSON)
+        </button>
     </div>
   </div>
+  
+  <div class="modal-overlay" id="json-modal">
+      <div class="modal-content">
+          <h2>Pegar Estructura JSON</h2>
+          <p>Pega aquí la estructura JSON de tu serie:</p>
+          <textarea id="json-input" placeholder="Ejemplo: {
+  &quot;title&quot;: &quot;Mi Serie Genial&quot;,
+  &quot;description&quot;: &quot;Esta es la descripción...&quot;,
+  &quot;coverImage&quot;: &quot;[...]&quot;,
+  &quot;episodes&quot;: [
+    {
+      &quot;title&quot;: &quot;Episodio 1&quot;,
+      &quot;videoUrl&quot;: &quot;[...]/video.mp4&quot;
+    }
+  ]
+}"
+          ></textarea>
+          <div class="modal-actions">
+              <button class="modal-btn" id="load-json-btn">Cargar Serie</button>
+              <button class="modal-btn" id="close-modal-btn">Cancelar</button>
+          </div>
+      </div>
+  </div>
 
-  <!-- Contenido principal -->
   <div class="container" id="main-container" style="display: none;">
     <div class="header">
       <div class="cover">
@@ -393,8 +527,7 @@
     </div>
 
     <div class="episodes" tabindex="0" id="episodes-container">
-      <!-- Los episodios se generan aquí -->
-    </div>
+      </div>
   </div>
 
   <script>
@@ -407,6 +540,11 @@
     const backBtn = document.getElementById('back-btn');
     const flashOverlay = document.getElementById('flash-overlay');
     const catboxBtn = document.getElementById('catbox-btn');
+    const optionsBtn = document.getElementById('options-btn'); // Nuevo botón
+    const jsonModal = document.getElementById('json-modal');     // Nuevo Modal
+    const jsonInput = document.getElementById('json-input');     // Nuevo Textarea
+    const loadJsonBtn = document.getElementById('load-json-btn'); // Nuevo botón de carga
+    const closeModalBtn = document.getElementById('close-modal-btn'); // Nuevo botón de cerrar
     
     // Variables para la serie actual
     let currentSeries = null;
@@ -429,6 +567,7 @@
     
     // Función para forzar apertura en navegador externo
     function forceOpenInBrowser(url) {
+      // ... (código forceOpenInBrowser idéntico al original) ...
       // Intentar múltiples métodos para salir del WebView
       
       // Método 1: Intent de Android
@@ -457,17 +596,42 @@
       }
     }
     
+    // Abrir el modal
+    function openJsonModal() {
+        jsonModal.classList.add('open');
+    }
+    
+    // Cerrar el modal
+    function closeJsonModal() {
+        jsonModal.classList.remove('open');
+    }
+
+    // Cargar JSON desde el input de texto
+    function loadJsonFromInput() {
+        const jsonText = jsonInput.value.trim();
+        if (!jsonText) {
+            alert('Por favor, introduce una estructura JSON.');
+            return;
+        }
+
+        try {
+            const seriesData = JSON.parse(jsonText);
+            closeJsonModal(); // Cerrar el modal al cargar
+            loadSeries(seriesData);
+        } catch (error) {
+            alert('Error al parsear el JSON. Asegúrate de que el formato es correcto: ' + error.message);
+        }
+    }
+    
     // Configurar eventos
     document.addEventListener('DOMContentLoaded', function() {
-      // Evento para el botón de Catbox - SIEMPRE fuerza navegador externo
+      // Evento para el botón de Catbox
       catboxBtn.addEventListener('click', function(e) {
         e.preventDefault();
         
         if (isWebView()) {
-          // En WebView: forzar apertura en navegador externo
           forceOpenInBrowser('https://catbox.moe');
         } else {
-          // En navegador normal: abrir en nueva pestaña
           window.open('https://catbox.moe', '_blank', 'noopener,noreferrer');
         }
       });
@@ -499,6 +663,16 @@
       
       // Evento para el botón de volver
       backBtn.addEventListener('click', showLoader);
+      
+      // Eventos del nuevo modal
+      optionsBtn.addEventListener('click', openJsonModal);
+      closeModalBtn.addEventListener('click', closeJsonModal);
+      loadJsonBtn.addEventListener('click', loadJsonFromInput);
+      jsonModal.addEventListener('click', (e) => {
+        if (e.target === jsonModal) {
+            closeJsonModal();
+        }
+      });
     });
     
     // Manejar la selección de archivo
@@ -547,8 +721,12 @@
       document.getElementById('series-title-display').textContent = seriesData.title || 'Serie sin título';
       document.getElementById('series-description-display').textContent = seriesData.description || '';
       
+      // Usar un placeholder si no hay imagen de portada
+      const coverImageElement = document.getElementById('cover-image');
       if (seriesData.coverImage) {
-        document.getElementById('cover-image').src = seriesData.coverImage;
+        coverImageElement.src = seriesData.coverImage;
+      } else {
+        coverImageElement.src = 'https://via.placeholder.com/200x300/333/fff?text=Portada';
       }
       
       // Actualizar episodios
@@ -568,8 +746,11 @@
             });
           }
           
+          // Usar un placeholder si no hay imagen de episodio
+          const episodeImage = episode.image || 'https://via.placeholder.com/100x150/333/fff?text=Episodio';
+          
           episodeElement.innerHTML = `
-            <img src="${episode.image || 'https://via.placeholder.com/100x150/333/fff?text=Episodio'}" alt="${episode.title || 'Episodio'}">
+            <img src="${episodeImage}" alt="${episode.title || 'Episodio'}">
             <div class="episode-info">
               <h3>${episode.title || 'Episodio sin título'}</h3>
               <p>${episode.description || ''}</p>
@@ -589,6 +770,7 @@
     
     // Función para reproducir episodio con animación
     function playEpisode(videoUrl) {
+      // ... (código playEpisode idéntico al original) ...
       // Resetear el overlay
       flashOverlay.classList.remove('active', 'fade-out');
       
@@ -635,6 +817,10 @@
         
         // Limpiar la serie actual
         currentSeries = null;
+        // Restablecer los colores del fondo a los originales por defecto
+        document.documentElement.style.setProperty('--color-primary', '#1a237e');
+        document.documentElement.style.setProperty('--color-secondary', '#4a148c');
+        document.documentElement.style.setProperty('--gradient-direction', 'to bottom right');
       }, 50);
     }
   </script>
