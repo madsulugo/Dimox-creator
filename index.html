@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Creador de Series</title>
-  <style>
+  <title>MSG CREATOR</title> <style>
     :root {
       --color-primary: #1a237e;
       --color-secondary: #4a148c;
@@ -310,21 +309,16 @@
   </style>
 </head>
      <meta name="theme-color" content="#007E8B">
-  <meta property="og:title" content="dimox creator">
-<meta property="og:description" content="crea series tipo madsulu go y compartelos con todo el mundo">
+  <meta property="og:title" content="MSG creator"> <meta property="og:description" content="crea series tipo madsulu go y compartelos con todo el mundo">
 <meta property="og:url" content="https://madsulugo.github.io/Dimox-creator/">
 <meta property="og:type" content="website">
 
 <meta name="twitter:card" content="summary">
 <body>
-  <!-- Boton para mostrar/ocultar panel -->
   <button class="toggle-panel" onclick="toggleControlPanel()"> Menu</button>
 
-  <!-- Panel de control -->
   <div class="control-panel" id="control-panel">
-    <h3>dimox creator</h3>
-    
-    <div class="top-controls">
+    <h3>MSG CREATOR</h3> <div class="top-controls">
       <button class="danger" onclick="deleteEverything()"> Borrar Todo</button>
     </div>
     
@@ -363,8 +357,7 @@
     <div class="control-section">
       <div class="section-title">Episodios</div>
       <div id="episode-controls">
-        <!-- Los controles de episodios se generan aqui -->
-      </div>
+        </div>
       <button onclick="addEpisode()"> Agregar Episodio</button>
     </div>
 
@@ -374,12 +367,10 @@
         <button onclick="saveSeries()"> Guardar Serie</button>
         <button onclick="newSeries()"> Nueva Serie</button>
         <button onclick="exportSeries()"> Exportar</button>
-        <button onclick="importSeries()"> Importar</button>
-      </div>
+        <button onclick="redirectToImport()"> Importar</button> </div>
     </div>
   </div>
 
-  <!-- Contenido principal -->
   <div class="container" id="main-container">
     <div class="header">
       <div class="cover">
@@ -395,8 +386,7 @@
     </div>
 
     <div class="episodes" tabindex="0" id="episodes-container">
-      <!-- Los episodios se generan aqui -->
-    </div>
+      </div>
   </div>
 
   <script>
@@ -592,33 +582,9 @@
       linkElement.click();
     }
 
-    // Importar una serie desde JSON
-    function importSeries() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      
-      input.onchange = e => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        
-        reader.onload = function(event) {
-          try {
-            const importedSeries = JSON.parse(event.target.result);
-            currentSeries = importedSeries;
-            updateControlPanel();
-            updateDisplay();
-            createEpisodeControls();
-            updateBackground();
-          } catch (error) {
-            alert('Error al cargar el archivo: ' + error.message);
-          }
-        };
-        
-        reader.readAsText(file);
-      };
-      
-      input.click();
+    // Función de redirección para importar
+    function redirectToImport() {
+      window.location.href = 'cargar.html';
     }
 
     // Crear una nueva serie
@@ -661,7 +627,7 @@
 
     // Eliminar todo (series guardadas y serie actual)
     function deleteEverything() {
-      if (confirm('�Estas seguro de que quieres borrar todo?')) {
+      if (confirm('Estas seguro de que quieres borrar todo?')) {
         // Eliminar todas las series guardadas
         savedSeries = [];
         localStorage.removeItem('savedSeries');
